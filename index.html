@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fast Food Rater</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0c;
+    --s1: #141414;
+    --s2: #1c1c1c;
+    --border: #272727;
+    --orange: #ff4c00;
+    --yellow: #ffc600;
+    --green: #39d98a;
+    --red: #ff4d4d;
+    --text: #f5f0e8;
+    --muted: #666;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 3.5rem 5rem 2.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--orange), var(--yellow));
+  }
+  .brand h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    letter-spacing: 0.05em;
+    line-height: 0.85;
+  }
+  .brand h1 em {
+    font-style: normal;
+    -webkit-text-stroke: 1.5px var(--orange);
+    color: transparent;
+  }
+  .brand p {
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.7rem;
+  }
+  .header-stats {
+    display: flex;
+    gap: 2.5rem;
+    padding-bottom: 0.4rem;
+  }
+  .hstat { text-align: right; }
+  .hstat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.6rem;
+    line-height: 1;
+    color: var(--orange);
+  }
+  .hstat-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-top: 0.15rem;
+  }
+
+  /* ── PODIUM ── */
+  .podium {
+    display: none;
+    gap: 0.8rem;
+    padding: 2rem 5rem 0;
+    flex-wrap: wrap;
+  }
+  .podium-card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 190px;
+    flex: 1;
+    animation: up 0.5s ease both;
+  }
+  .podium-card:first-child { border-color: var(--yellow); }
+  .trophy { font-size: 1.3rem; }
+  .pod-info { flex:1; }
+  .pod-cat {
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .pod-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    line-height: 1.3;
+    margin-top: 0.1rem;
+  }
+  .pod-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    color: var(--yellow);
+  }
+
+  /* ── CONTROLS ── */
+  .controls {
+    padding: 1.2rem 5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .sort-lbl {
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .pills { display:flex; gap:0.35rem; flex-wrap:wrap; }
+  .pill {
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .pill:hover { border-color: #444; color: var(--text); }
+  .pill.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .search-wrap { margin-left: auto; position: relative; }
+  .search-wrap svg {
+    position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%);
+    opacity: 0.35; pointer-events: none;
+  }
+  #searchBox {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.35rem 1rem 0.35rem 2.2rem;
+    color: var(--text);
+    font-size: 0.78rem;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    width: 210px;
+    transition: border-color 0.2s;
+  }
+  #searchBox:focus { border-color: var(--orange); }
+  #searchBox::placeholder { color: var(--muted); }
+
+  /* ── STATUS ── */
+  #statusBar {
+    height: 2.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 5rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  #statusBar.err { color: var(--red); }
+  #statusBar.ok  { color: var(--green); }
+  .spin {
+    width:12px; height:12px;
+    border: 2px solid var(--border);
+    border-top-color: var(--orange);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display:none; flex-shrink:0;
+  }
+  .spin.on { display:block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── GRID ── */
+  .grid-wrap { padding: 2.5rem 5rem 5rem; }
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--s1);
+    padding: 1.4rem;
+    transition: background 0.18s;
+    animation: up 0.4s ease both;
+    position: relative;
+  }
+  .card:hover { background: var(--s2); }
+  @keyframes up {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .card-rank {
+    position: absolute;
+    top: 1rem; right: 1.2rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    color: var(--border);
+    letter-spacing: 0.05em;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 1.1rem;
+  }
+  .logo-box {
+    width: 44px; height: 44px;
+    border-radius: 9px;
+    background: #fff;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-box img { width: 38px; height: 38px; object-fit: contain; }
+  .logo-init {
+    width: 44px; height: 44px;
+    border-radius: 9px;
+    background: var(--s2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--orange);
+    flex-shrink: 0;
+  }
+  .card-title { flex:1; }
+  .card-title h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.92rem;
+    line-height: 1.25;
+  }
+  .card-title .vtag {
+    font-size: 0.62rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+    letter-spacing: 0.04em;
+  }
+  .overall-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .metrics { display:flex; flex-direction:column; gap:0.55rem; margin-bottom:1rem; }
+  .mrow {
+    display: grid;
+    grid-template-columns: 80px 1fr 32px;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .mlabel {
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .fill {
+    height: 100%;
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.9s cubic-bezier(0.16,1,0.3,1);
+  }
+  .mval {
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-align: right;
+  }
+  .ratios {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border);
+  }
+  .chip {
+    background: var(--bg);
+    border-radius: 7px;
+    padding: 0.55rem 0.7rem;
+  }
+  .chip-lbl {
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+  }
+  .chip-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+  }
+  .empty {
+    grid-column: 1/-1;
+    background: var(--s1);
+    padding: 6rem 2rem;
+    text-align: center;
+  }
+  .empty .big-icon { font-size: 4rem; display:block; margin-bottom:1rem; }
+  .empty p { color: var(--muted); font-size: 0.82rem; line-height: 1.7; }
+
+  @media (max-width: 768px) {
+    header, .controls, .grid-wrap, #statusBar, .podium { padding-left: 1.5rem; padding-right: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>FAST FOOD<br><em>RATER</em></h1>
+    <p>Community scores · averaged across all reviewers</p>
+  </div>
+  <div class="header-stats">
+    <div class="hstat"><div class="hstat-num" id="statR">—</div><div class="hstat-label">Restaurants</div></div>
+    <div class="hstat"><div class="hstat-num" id="statV">—</div><div class="hstat-label">Reviews</div></div>
+    <div class="hstat"><div class="hstat-num" id="statA">—</div><div class="hstat-label">Avg Score</div></div>
+  </div>
+</header>
+
+<div class="podium" id="podium"></div>
+
+<div class="controls">
+  <span class="sort-lbl">Sort by</span>
+  <div class="pills" id="pills">
+    <button class="pill active" data-sort="overall">Overall</button>
+    <button class="pill" data-sort="price">Price</button>
+    <button class="pill" data-sort="quality">Quality</button>
+    <button class="pill" data-sort="quantity">Quantity</button>
+    <button class="pill" data-sort="ease">Ease of Pay</button>
+    <button class="pill" data-sort="qop">Quality / Price</button>
+    <button class="pill" data-sort="quop">Quantity / Price</button>
+  </div>
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchBox" placeholder="Search…" oninput="render()">
+  </div>
+</div>
+
+<div id="statusBar">
+  <div class="spin" id="spin"></div>
+  <span id="statusTxt">Loading…</span>
+</div>
+
+<div class="grid-wrap">
+  <div id="grid">
+    <div class="empty"><span class="big-icon">⏳</span><p>Fetching your data…</p></div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────
+//  👇 REPLACE THIS WITH YOUR GOOGLE SHEET ID
+//     (the long string in your sheet's URL)
+// ─────────────────────────────────────────────────────
+const SHEET_ID = "1bAstDcEubQ3SlRpZyzd6HktJWB5lLHvGdtB691yK1dA";
+// ─────────────────────────────────────────────────────
+
+// Expected sheet columns (row 1 headers):
+//   Restaurant | Price | Quality | Quantity | EaseOfPayment
+// Scores 1–10. Each reviewer adds a new row; duplicates are averaged.
+// Sheet must be published: File → Share → Publish to web → CSV
+
+const DOMAINS = {
+  "arby's":"arbys.com","arby":"arbys.com",
+  "big boy restaurants":"bigboy.com","big boy":"bigboy.com",
+  "burger king":"burgerking.com",
+  "carl's jr.":"carlsjr.com","carl's jr":"carlsjr.com","carls jr":"carlsjr.com",
+  "chick-fil-a":"chick-fil-a.com","chick fil a":"chick-fil-a.com",
+  "dave's hot chicken":"daveshotchicken.com","daves hot chicken":"daveshotchicken.com",
+  "domino's":"dominos.com","dominos":"dominos.com",
+  "dunkin' donuts":"dunkindonuts.com","dunkin donuts":"dunkindonuts.com","dunkin":"dunkindonuts.com",
+  "hardee's":"hardees.com","hardees":"hardees.com",
+  "hesburger":"hesburger.fi",
+  "kfc":"kfc.com",
+  "little caesars":"littlecaesars.com",
+  "max hamburgers":"max.se","max":"max.se",
+  "mcdonald's":"mcdonalds.com","mcdonalds":"mcdonalds.com",
+  "panda express":"pandaexpress.com",
+  "papa john's":"papajohns.com","papa johns":"papajohns.com",
+  "pita pit":"pitapit.com",
+  "pizza hut":"pizzahut.com",
+  "pizza inn":"pizzainn.com",
+  "pollo campero":"campero.com",
+  "pollo tropical":"pollotropical.com",
+  "popeyes":"popeyes.com",
+  "subway":"subway.com",
+  "taco bell":"tacobell.com",
+  "tim hortons":"timhortons.com",
+  "wendy's":"wendys.com","wendys":"wendys.com",
+  "wetzel's pretzels":"wetzels.com","wetzels pretzels":"wetzels.com",
+  "whataburger":"whataburger.com",
+  "wingstreet":"wingstreet.com",
+  "chipotle mexican grill":"chipotle.com","chipotle":"chipotle.com"
+};
+
+const getDomain = name => DOMAINS[name.toLowerCase().trim()] || null;
+
+let data = [];
+let sortKey = 'overall';
+
+window.onload = () => {
+  fetchData();
+  document.querySelectorAll('.pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      sortKey = p.dataset.sort;
+      render();
+    });
+  });
+};
+
+async function fetchData() {
+  setStatus("Fetching sheet…", "loading");
+  try {
+    const res = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    parse(await res.text());
+  } catch(e) {
+    setStatus(`Error: ${e.message} — make sure the sheet is published as CSV.`, "err");
+    document.getElementById('grid').innerHTML = `<div class="empty"><span class="big-icon">❌</span><p>${e.message}</p></div>`;
+  }
+}
+
+function parse(text) {
+  const lines = text.trim().split('\n').map(l=>l.trim()).filter(Boolean);
+  if (lines.length < 2) { setStatus("Sheet appears empty.", "err"); return; }
+
+  const hdrs = lines[0].split(',').map(h=>h.replace(/["\r]/g,'').trim().toLowerCase());
+  const ci = {
+    name:     Math.max(0, hdrs.findIndex(h=>h.includes('restaurant')||h.includes('name'))),
+    price:    hdrs.findIndex(h=>h.includes('price')),
+    quality:  hdrs.findIndex(h=>h.includes('quality')),
+    quantity: hdrs.findIndex(h=>h.includes('quantity')),
+    ease:     hdrs.findIndex(h=>h.includes('ease')||h.includes('payment')),
+  };
+  if (ci.price    < 0) ci.price    = 1;
+  if (ci.quality  < 0) ci.quality  = 2;
+  if (ci.quantity < 0) ci.quantity = 3;
+  if (ci.ease     < 0) ci.ease     = 4;
+
+  const raw = {};
+  for (let i = 1; i < lines.length; i++) {
+    const cols = csvSplit(lines[i]);
+    const name = (cols[ci.name]||'').replace(/"/g,'').trim();
+    if (!name) continue;
+    (raw[name] = raw[name]||[]).push({
+      price:    parseFloat(cols[ci.price])||0,
+      quality:  parseFloat(cols[ci.quality])||0,
+      quantity: parseFloat(cols[ci.quantity])||0,
+      ease:     parseFloat(cols[ci.ease])||0,
+    });
+  }
+
+  let totalReviews = 0;
+  data = Object.entries(raw).map(([name, rows]) => {
+    totalReviews += rows.length;
+    const n = rows.length;
+    const a = k => rows.reduce((s,r)=>s+r[k],0)/n;
+    const price=a('price'), quality=a('quality'), quantity=a('quantity'), ease=a('ease');
+    const overall = (price+quality+quantity+ease)/4;
+    return { name, votes:n, price, quality, quantity, ease, overall,
+             qop:  price>0 ? quality/price  : 0,
+             quop: price>0 ? quantity/price : 0 };
+  });
+
+  if (!data.length) { setStatus("No valid rows found.", "err"); return; }
+
+  document.getElementById('statR').textContent = data.length;
+  document.getElementById('statV').textContent = totalReviews;
+  document.getElementById('statA').textContent = (data.reduce((s,r)=>s+r.overall,0)/data.length).toFixed(1);
+
+  buildPodium();
+  setStatus(`${data.length} restaurants · ${totalReviews} total reviews`, "ok");
+  render();
+}
+
+function csvSplit(line) {
+  const r=[]; let cur='', q=false;
+  for(const c of line){
+    if(c==='"'){q=!q;continue;}
+    if(c===','&&!q){r.push(cur);cur='';continue;}
+    cur+=c;
+  }
+  r.push(cur); return r;
+}
+
+function buildPodium() {
+  const winners = [
+    { icon:'🏆', cat:'Best Overall',    key:'overall', fmt:v=>v.toFixed(1) },
+    { icon:'💎', cat:'Best Quality',    key:'quality', fmt:v=>v.toFixed(1) },
+    { icon:'💰', cat:'Best Value (Q/P)',key:'qop',     fmt:v=>v.toFixed(2)+'×' },
+  ];
+  const pod = document.getElementById('podium');
+  pod.style.display = 'flex';
+  pod.innerHTML = winners.map((w,i) => {
+    const best = [...data].sort((a,b)=>b[w.key]-a[w.key])[0];
+    return `<div class="podium-card" style="animation-delay:${i*0.08}s">
+      <span class="trophy">${w.icon}</span>
+      <div class="pod-info">
+        <div class="pod-cat">${w.cat}</div>
+        <div class="pod-name">${best.name}</div>
+      </div>
+      <div class="pod-score">${w.fmt(best[w.key])}</div>
+    </div>`;
+  }).join('');
+}
+
+function render() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  const d = data.filter(r=>r.name.toLowerCase().includes(q))
+                .sort((a,b)=>b[sortKey]-a[sortKey]);
+
+  const grid = document.getElementById('grid');
+  if (!d.length) {
+    grid.innerHTML = `<div class="empty"><span class="big-icon">🔍</span><p>No restaurants match.</p></div>`;
+    return;
+  }
+  grid.innerHTML = d.map((r,i)=>buildCard(r,i)).join('');
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.fill').forEach(el=>{ el.style.width = el.dataset.w+'%'; });
+  });
+}
+
+function scoreColor(v) {
+  if (v >= 7) return '#39d98a';
+  if (v >= 4) return '#ffc600';
+  return '#ff4d4d';
+}
+
+function buildCard(r, i) {
+  const d = getDomain(r.name);
+  const logoHtml = d
+    ? `<div class="logo-box"><img src="https://logo.clearbit.com/${d}" alt=""
+         onerror="this.src='https://www.google.com/s2/favicons?domain=${d}&sz=64';this.onerror=function(){this.closest('.logo-box').outerHTML='<div class=logo-init>${r.name[0].toUpperCase()}</div>'}"/></div>`
+    : `<div class="logo-init">${r.name[0].toUpperCase()}</div>`;
+
+  const bars = [
+    { label:'Price',       val:r.price },
+    { label:'Quality',     val:r.quality },
+    { label:'Quantity',    val:r.quantity },
+    { label:'Ease of Pay', val:r.ease },
+  ].map(m=>`
+    <div class="mrow">
+      <span class="mlabel">${m.label}</span>
+      <div class="track"><div class="fill" data-w="${m.val*10}" style="background:${scoreColor(m.val)}"></div></div>
+      <span class="mval" style="color:${scoreColor(m.val)}">${m.val.toFixed(1)}</span>
+    </div>`).join('');
+
+  return `<div class="card" style="animation-delay:${Math.min(i*0.035,0.5)}s">
+    <span class="card-rank">#${i+1}</span>
+    <div class="card-head">
+      ${logoHtml}
+      <div class="card-title">
+        <h3>${r.name}</h3>
+        <div class="vtag">${r.votes} review${r.votes!==1?'s':''}</div>
+      </div>
+      <div class="overall-score" style="color:${scoreColor(r.overall)}">${r.overall.toFixed(1)}</div>
+    </div>
+    <div class="metrics">${bars}</div>
+    <div class="ratios">
+      <div class="chip">
+        <div class="chip-lbl">Quality / Price</div>
+        <div class="chip-val" style="color:${scoreColor(Math.min(r.qop*5,10))}">${r.qop.toFixed(2)}×</div>
+      </div>
+      <div class="chip">
+        <div class="chip-lbl">Quantity / Price</div>
+        <div class="chip-val" style="color:${scoreColor(Math.min(r.quop*5,10))}">${r.quop.toFixed(2)}×</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function setStatus(msg, type) {
+  document.getElementById('statusTxt').textContent = msg;
+  document.getElementById('statusBar').className = type==='err'?'err':type==='ok'?'ok':'';
+  document.getElementById('spin').className = 'spin'+(type==='loading'?' on':'');
+}
+</script>
+</body>
+</html>
