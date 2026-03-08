@@ -471,11 +471,11 @@ function parse(text) {
 
   const hdrs = lines[0].split(',').map(h=>h.replace(/["\r]/g,'').trim().toLowerCase());
   const ci = {
-    name:     Math.max(0, hdrs.findIndex(h=>h.includes('restaurant')||h.includes('name'))),
-    price:    hdrs.findIndex(h=>h.includes('price')),
-    quality:  hdrs.findIndex(h=>h.includes('quality')),
-    quantity: hdrs.findIndex(h=>h.includes('quantity')),
-    ease:     hdrs.findIndex(h=>h.includes('ease')||h.includes('payment')),
+    name:     1, //Math.max(0, hdrs.findIndex(h=>h.includes('restaurant')||h.includes('name'))),
+    price:    2, //hdrs.findIndex(h=>h.includes('price')),
+    quality:  3, //hdrs.findIndex(h=>h.includes('quality')),
+    quantity: 4, //hdrs.findIndex(h=>h.includes('quantity')),
+    ease:     5, //hdrs.findIndex(h=>h.includes('ease')||h.includes('payment')),
   };
   if (ci.price    < 0) ci.price    = 1;
   if (ci.quality  < 0) ci.quality  = 2;
